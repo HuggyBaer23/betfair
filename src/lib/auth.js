@@ -74,7 +74,7 @@ class BetfairAuth {
         });
     }
 
-    loginBot(login, password, options, cb = ()=> {}) {
+    loginBot(login, password, cb = ()=> {}) {
         let formData = querystring.stringify({
             username: login,
             password: password,
@@ -90,8 +90,8 @@ class BetfairAuth {
                 'content-length': formData.length,
                 'x-application': 'BetfairAPI'
             },
-            key: fs.readFileSync('../../../../certs/betfair.pem'),
-            cert: fs.readFileSync('../../../../certs/betfair.crt'), 
+            key: fs.readFileSync('./certs/betfair.pem'),
+            cert: fs.readFileSync('./certs/betfair.crt'), 
         };
         HttpRequest.post(AUTH_URLS.interactiveLogin, formData, options, (err, res) => {
             if (err) {
