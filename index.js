@@ -5,7 +5,7 @@
 //
 
 module.exports = {
-    BetfairSession: require('./lib/session.js'),
-    BetfairPrice: require('./lib/betfair_price.js'),
-    Logger: require('./lib/logger.js')
+    BetfairSession: require('./src/lib/session.js'),
+    BetfairPrice: require('./src/lib/betfair_price.js'),
+    Logger: require('./src/lib/logger.js')
 };
