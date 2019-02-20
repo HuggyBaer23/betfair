@@ -4,6 +4,7 @@
 let HttpRequest = require('./http_request.js');
 let querystring = require('querystring');
 let cookieJar = require('./cookie_jar.js');
+let fs = require('fs');
 
 const AUTH_URLS = {
     interactiveLogin: 'https://identitysso.betfair.com:443/api/login',
@@ -53,7 +54,7 @@ class BetfairAuth {
                 'x-application': 'BetfairAPI'
             }
         };
-        HttpRequest.post(AUTH_URLS.interactiveLogin, formData, options, (err, res) => {
+        HttpRequest.post(AUTH_URLS.botLogin, formData, options, (err, res) => {
             if (err) {
                 cb(err);
                 return;
@@ -74,7 +75,42 @@ class BetfairAuth {
     }
 
     loginBot(login, password, options, cb = ()=> {}) {
-
+        let formData = querystring.stringify({
+            username: login,
+            password: password,
+            login: true,
+            redirectMethod: 'POST',
+            product: 'home.betfair.int',
+            url: 'https://www.betfair.com/'
+        });
+        let options = {
+            headers: {
+                "accept": "application/json",
+                "content-type": "application/x-www-form-urlencoded",
+                'content-length': formData.length,
+                'x-application': 'BetfairAPI'
+            },
+            key: fs.readFileSync('../../../../certs/betfair.pem'),
+            cert: fs.readFileSync('../../../../certs/betfair.crt'), 
+        };
+        HttpRequest.post(AUTH_URLS.interactiveLogin, formData, options, (err, res) => {
+            if (err) {
+                cb(err);
+                return;
+            }
+            if (res.responseBody.status != 'SUCCESS') {
+                cb(res.responseBody.error);
+                return;
+            }
+            cb(null, {
+                success: res.responseBody.status == 'SUCCESS',
+                sessionKey: res.responseBody.token,
+                duration: res.duration,
+                responseBody: res.responseBody
+            });
+            // log successful result
+            this.logAuthCall('loginBot', res);
+        });
     }
 
     logout(sessionKey, cb = ()=> {}) {
